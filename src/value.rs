@@ -1,29 +1,40 @@
+/// Logical value type used for SQL parameters and decoded rows.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Value {
+    /// SQL null.
     Null,
+    /// Signed integer.
     Integer(i64),
+    /// Floating-point number (must be finite).
     Float(f64),
+    /// UTF-8 text.
     Text(String),
+    /// Base64-encoded binary payload.
     BlobBase64(String),
 }
 
 impl Value {
+    /// Creates a null value.
     pub fn null() -> Self {
         Self::Null
     }
 
+    /// Creates an integer value.
     pub fn integer(value: i64) -> Self {
         Self::Integer(value)
     }
 
+    /// Creates a float value.
     pub fn float(value: f64) -> Self {
         Self::Float(value)
     }
 
+    /// Creates a text value.
     pub fn text(value: impl Into<String>) -> Self {
         Self::Text(value.into())
     }
 
+    /// Creates a base64 blob value.
     pub fn blob_base64(value: impl Into<String>) -> Self {
         Self::BlobBase64(value.into())
     }

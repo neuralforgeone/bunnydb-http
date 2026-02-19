@@ -1,16 +1,23 @@
 use crate::Value;
 
+/// SQL parameter container.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Params {
+    /// Positional values mapped to `?` placeholders.
     Positional(Vec<Value>),
+    /// Named values mapped to `:name` style placeholders.
     Named(Vec<(String, Value)>),
 }
 
 impl Params {
+    /// Builds positional parameters.
     pub fn positional(values: impl Into<Vec<Value>>) -> Self {
         Self::Positional(values.into())
     }
 
+    /// Builds named parameters.
+    ///
+    /// Names can be provided with or without prefix (`:`, `@`, `$`).
     pub fn named<I, K>(pairs: I) -> Self
     where
         I: IntoIterator<Item = (K, Value)>,
@@ -55,14 +62,19 @@ impl From<Vec<(String, Value)>> for Params {
     }
 }
 
+/// Single statement inside a batch request.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Statement {
+    /// SQL text.
     pub sql: String,
+    /// Statement parameters.
     pub params: Params,
+    /// Whether the statement should return rows.
     pub want_rows: bool,
 }
 
 impl Statement {
+    /// Creates a row-returning statement.
     pub fn query<P: Into<Params>>(sql: impl Into<String>, params: P) -> Self {
         Self {
             sql: sql.into(),
@@ -71,6 +83,7 @@ impl Statement {
         }
     }
 
+    /// Creates an execution-only statement.
     pub fn execute<P: Into<Params>>(sql: impl Into<String>, params: P) -> Self {
         Self {
             sql: sql.into(),

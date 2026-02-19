@@ -11,6 +11,7 @@ use crate::{
 };
 
 #[derive(Clone)]
+/// HTTP client for Bunny.net Database SQL pipeline endpoint.
 pub struct BunnyDbClient {
     http: reqwest::Client,
     pipeline_url: String,
@@ -29,10 +30,17 @@ impl fmt::Debug for BunnyDbClient {
 }
 
 impl BunnyDbClient {
+    /// Creates a client with a raw authorization header value.
+    ///
+    /// This is backward-compatible with previous versions where `token`
+    /// was passed directly as `Authorization: <value>`.
     pub fn new(pipeline_url: impl Into<String>, token: impl Into<String>) -> Self {
         Self::new_raw_auth(pipeline_url, token)
     }
 
+    /// Creates a client with a full raw authorization value.
+    ///
+    /// Example: `"Bearer <token>"` or any custom scheme.
     pub fn new_raw_auth(pipeline_url: impl Into<String>, authorization: impl Into<String>) -> Self {
         Self {
             http: reqwest::Client::new(),
@@ -42,26 +50,36 @@ impl BunnyDbClient {
         }
     }
 
+    /// Creates a client from a bearer token.
+    ///
+    /// If the token is missing the `Bearer ` prefix, it is added automatically.
     pub fn new_bearer(pipeline_url: impl Into<String>, token: impl AsRef<str>) -> Self {
         let authorization = normalize_bearer_authorization(token.as_ref());
         Self::new_raw_auth(pipeline_url, authorization)
     }
 
+    /// Applies client options such as timeout and retry behavior.
     pub fn with_options(mut self, opts: ClientOptions) -> Self {
         self.options = opts;
         self
     }
 
+    /// Executes a query statement and returns rows.
     pub async fn query<P: Into<Params>>(&self, sql: &str, params: P) -> Result<QueryResult> {
         let result = self.run_single(sql, params.into(), true).await?;
         decode_query_result(result)
     }
 
+    /// Executes a statement and returns execution metadata.
     pub async fn execute<P: Into<Params>>(&self, sql: &str, params: P) -> Result<ExecResult> {
         let result = self.run_single(sql, params.into(), false).await?;
         decode_exec_result(result)
     }
 
+    /// Sends multiple statements in one pipeline request.
+    ///
+    /// SQL errors at statement level are returned as
+    /// [`StatementOutcome::SqlError`] instead of failing the entire batch.
     pub async fn batch<I>(&self, statements: I) -> Result<Vec<StatementOutcome>>
     where
         I: IntoIterator<Item = Statement>,
