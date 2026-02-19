@@ -1,14 +1,14 @@
 [package]
-name = "bunnydb-http"
+name = "bunnydb-rs"
 version = "0.3.0"
 edition = "2021"
 rust-version = "1.75"
 license = "MIT"
 description = "Async HTTP client for Bunny.net Database SQL pipeline API — native and WASM (Bunny Edge Scripts)"
 readme = "README.md"
-repository = "https://github.com/neuralforgeone/bunnydb-http"
-homepage = "https://github.com/neuralforgeone/bunnydb-http"
-documentation = "https://docs.rs/bunnydb-http"
+repository = "https://github.com/neuralforgeone/bunnydb-rs"
+homepage = "https://github.com/neuralforgeone/bunnydb-rs"
+documentation = "https://docs.rs/bunnydb-rs"
 keywords = ["bunnydb", "sqlite", "http", "database", "wasm"]
 categories = ["api-bindings", "asynchronous", "database", "wasm"]
 exclude = ["secrets.json"]

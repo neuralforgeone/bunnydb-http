@@ -1,8 +1,8 @@
-# bunnydb-http
+# bunnydb-rs
 
-[![crates.io](https://img.shields.io/crates/v/bunnydb-http.svg)](https://crates.io/crates/bunnydb-http)
-[![docs.rs](https://docs.rs/bunnydb-http/badge.svg)](https://docs.rs/bunnydb-http)
-[![CI](https://github.com/neuralforgeone/bunnydb-http/actions/workflows/ci.yml/badge.svg)](https://github.com/neuralforgeone/bunnydb-http/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/bunnydb-rs.svg)](https://crates.io/crates/bunnydb-rs)
+[![docs.rs](https://docs.rs/bunnydb-rs/badge.svg)](https://docs.rs/bunnydb-rs)
+[![CI](https://github.com/neuralforgeone/bunnydb-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/neuralforgeone/bunnydb-rs/actions/workflows/ci.yml)
 [![WASM](https://img.shields.io/badge/target-wasm32--unknown--unknown-blueviolet)](https://webassembly.org)
 
 Async Rust client for the Bunny.net Database SQL pipeline API —
@@ -29,7 +29,7 @@ Target endpoint format:
 
 ```toml
 [dependencies]
-bunnydb-http = "0.3"
+bunnydb-rs = "0.3"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
 
@@ -40,7 +40,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 crate-type = ["cdylib"]
 
 [dependencies]
-bunnydb-http = "0.3"       # reqwest uses fetch API automatically on wasm32
+bunnydb-rs = "0.3"       # reqwest uses fetch API automatically on wasm32
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 ```
@@ -291,7 +291,7 @@ Bunny CDN edge PoP
   └── edge/main.ts           tiny TypeScript host (~30 lines)
         ↕ wasm-bindgen
   └── src/lib.rs             your Rust logic compiled to .wasm
-        └── bunnydb-http     reqwest → browser fetch API
+        └── bunnydb-rs       reqwest → browser fetch API
               └── BunnyDB /v2/pipeline
 ```
 

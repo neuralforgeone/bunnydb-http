@@ -1,6 +1,6 @@
-# Architecture — bunnydb-http
+# Architecture — bunnydb-rs
 
-This document describes the internal structure of the `bunnydb-http` crate, the
+This document describes the internal structure of the `bunnydb-rs` crate, the
 responsibilities of each module, how data flows from a user call down to the
 wire, and design decisions that were made along the way.
 
@@ -9,7 +9,7 @@ wire, and design decisions that were made along the way.
 ## Module Map
 
 ```
-bunnydb-http/src/
+bunnydb-rs/src/
 ├── lib.rs          ← Public API surface, re-exports
 ├── client.rs       ← BunnyDbClient — constructors, query/execute/batch, retry
 ├── decode.rs       ← statement builder + response decoder

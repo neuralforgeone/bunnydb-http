@@ -21,7 +21,7 @@
 //!   └── edge/main.ts          ← TypeScript host, loads .wasm
 //!         ↕ wasm-bindgen glue
 //!   └── src/lib.rs            ← Rust handler (this file, compiled to WASM)
-//!         └── bunnydb-http    ← HTTP pipeline client (reqwest → fetch API)
+//!         └── bunnydb-rs      ← HTTP pipeline client (reqwest → fetch API)
 //!               └── BunnyDB /v2/pipeline
 //! ```
 

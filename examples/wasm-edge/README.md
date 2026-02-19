@@ -1,7 +1,7 @@
 # bunnydb-edge-handler
 
 **Pure-Rust WebAssembly handler for Bunny Edge Scripts.**  
-Uses `bunnydb-http` to query BunnyDB directly from the edge — no Node.js,
+Uses `bunnydb-rs` to query BunnyDB directly from the edge — no Node.js,
 no TypeScript DB logic, no extra hop.
 
 ```
@@ -9,7 +9,7 @@ Your users → Bunny CDN Edge PoP
                 ↓
         edge/main.ts       (tiny TS host, ~30 lines)
                 ↓  wasm-bindgen
-        src/lib.rs    ←── bunnydb-http crate
+        src/lib.rs    ←── bunnydb-rs crate
                 ↓  reqwest (fetch API in WASM)
           BunnyDB /v2/pipeline
 ```

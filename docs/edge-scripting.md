@@ -1,6 +1,6 @@
-# Edge Scripting — bunnydb-http
+# Edge Scripting — bunnydb-rs
 
-This document explains how to use **bunnydb-http** from within
+This document explains how to use **bunnydb-rs** from within
 **Bunny Edge Scripts** and **Magic Container** deployments.
 
 > **What is Bunny Edge Scripting?**  

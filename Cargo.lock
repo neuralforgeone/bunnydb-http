@@ -653,7 +653,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c6f81257d10a0f602a294ae4182251151ff97dbb504ef9afcdda4a64b24d9b4"
 
 [[package]]
-name = "bunnydb-http"
+name = "bunnydb-rs"
 version = "0.3.0"
 dependencies = [
  "anyhow",
