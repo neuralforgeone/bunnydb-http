@@ -1,0 +1,24 @@
+name: Live Integration
+
+on:
+  # Only runs when manually triggered — never on push/PR.
+  # Requires BUNNYDB_PIPELINE_URL and BUNNYDB_TOKEN secrets to be configured
+  # in the repository settings (Settings → Secrets → Actions).
+  workflow_dispatch:
+
+jobs:
+  live:
+    name: Live integration tests
+    runs-on: ubuntu-latest
+    # Double-guard: workflow_dispatch is manual-only, but this env check also
+    # prevents accidental runs if someone copies this file without secrets.
+    env:
+      BUNNYDB_PIPELINE_URL: ${{ secrets.BUNNYDB_PIPELINE_URL }}
+      BUNNYDB_TOKEN: ${{ secrets.BUNNYDB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Run live integration tests
+        run: cargo test --test live_integration -- --nocapture
