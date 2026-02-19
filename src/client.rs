@@ -10,6 +10,13 @@ use crate::{
     StatementOutcome,
 };
 
+/// Formats a database ID into the canonical pipeline URL.
+///
+/// Example: `"abc123"` → `"https://abc123.lite.bunnydb.net/v2/pipeline"`
+pub fn db_id_to_pipeline_url(db_id: &str) -> String {
+    format!("https://{}.lite.bunnydb.net/v2/pipeline", db_id.trim())
+}
+
 #[derive(Clone)]
 /// HTTP client for Bunny.net Database SQL pipeline endpoint.
 pub struct BunnyDbClient {
@@ -56,6 +63,86 @@ impl BunnyDbClient {
     pub fn new_bearer(pipeline_url: impl Into<String>, token: impl AsRef<str>) -> Self {
         let authorization = normalize_bearer_authorization(token.as_ref());
         Self::new_raw_auth(pipeline_url, authorization)
+    }
+
+    /// Creates a client from a **Bunny Database ID** and a bearer token.
+    ///
+    /// The pipeline URL is derived automatically:
+    /// `https://<db_id>.lite.bunnydb.net/v2/pipeline`
+    ///
+    /// This is the most ergonomic constructor when you know the database ID.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use bunnydb_http::BunnyDbClient;
+    ///
+    /// let db = BunnyDbClient::from_db_id("my-db-id", "my-token");
+    /// ```
+    pub fn from_db_id(db_id: impl AsRef<str>, token: impl AsRef<str>) -> Self {
+        let url = db_id_to_pipeline_url(db_id.as_ref());
+        Self::new_bearer(url, token)
+    }
+
+    /// Creates a client from environment variables.
+    ///
+    /// Reads:
+    /// - `BUNNYDB_PIPELINE_URL` — full pipeline endpoint URL  
+    ///   (e.g. `https://<id>.lite.bunnydb.net/v2/pipeline`)
+    /// - `BUNNYDB_TOKEN` — access token (Bearer prefix optional)
+    ///
+    /// Returns an error if either variable is missing or empty.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use bunnydb_http::BunnyDbClient;
+    ///
+    /// // Set env vars via shell or .env loader, then:
+    /// let db = BunnyDbClient::from_env().expect("missing BUNNYDB_* env vars");
+    /// ```
+    pub fn from_env() -> std::result::Result<Self, String> {
+        let url = std::env::var("BUNNYDB_PIPELINE_URL")
+            .map_err(|_| "missing BUNNYDB_PIPELINE_URL environment variable".to_owned())?;
+        let token = std::env::var("BUNNYDB_TOKEN")
+            .map_err(|_| "missing BUNNYDB_TOKEN environment variable".to_owned())?;
+        if url.trim().is_empty() {
+            return Err("BUNNYDB_PIPELINE_URL is set but empty".to_owned());
+        }
+        if token.trim().is_empty() {
+            return Err("BUNNYDB_TOKEN is set but empty".to_owned());
+        }
+        Ok(Self::new_bearer(url, token))
+    }
+
+    /// Creates a client from a **database ID** read from the environment,
+    /// combined with an access token also read from the environment.
+    ///
+    /// Reads:
+    /// - `BUNNYDB_ID` — the database ID (e.g. `my-db-abc123`)
+    /// - `BUNNYDB_TOKEN` — access token
+    ///
+    /// The pipeline URL is derived from the database ID automatically.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use bunnydb_http::BunnyDbClient;
+    ///
+    /// let db = BunnyDbClient::from_env_db_id().expect("missing BUNNYDB_ID / BUNNYDB_TOKEN");
+    /// ```
+    pub fn from_env_db_id() -> std::result::Result<Self, String> {
+        let db_id = std::env::var("BUNNYDB_ID")
+            .map_err(|_| "missing BUNNYDB_ID environment variable".to_owned())?;
+        let token = std::env::var("BUNNYDB_TOKEN")
+            .map_err(|_| "missing BUNNYDB_TOKEN environment variable".to_owned())?;
+        if db_id.trim().is_empty() {
+            return Err("BUNNYDB_ID is set but empty".to_owned());
+        }
+        if token.trim().is_empty() {
+            return Err("BUNNYDB_TOKEN is set but empty".to_owned());
+        }
+        Ok(Self::from_db_id(db_id, token))
     }
 
     /// Applies client options such as timeout and retry behavior.

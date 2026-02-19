@@ -6,16 +6,27 @@
 //! - [`BunnyDbClient::execute`]
 //! - [`BunnyDbClient::batch`]
 //!
-//! # Quick Start
+//! ## Client Construction
+//!
+//! Choose the constructor that fits your deployment:
+//!
+//! | Constructor | When to use |
+//! |---|---|
+//! | [`BunnyDbClient::from_env`] | 12-factor / container: `BUNNYDB_PIPELINE_URL` + `BUNNYDB_TOKEN` |
+//! | [`BunnyDbClient::from_env_db_id`] | Edge scripts / containers: `BUNNYDB_ID` + `BUNNYDB_TOKEN` |
+//! | [`BunnyDbClient::from_db_id`] | Hardcoded DB ID, token from config |
+//! | [`BunnyDbClient::new_bearer`] | Full URL + bearer token |
+//! | [`BunnyDbClient::new_raw_auth`] | Full URL + custom auth header |
+//!
+//! # Quick Start — environment variables
 //!
 //! ```no_run
-//! use bunnydb_http::{BunnyDbClient, Params, Value};
+//! use bunnydb_http::BunnyDbClient;
 //!
 //! # #[tokio::main]
 //! # async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! let pipeline_url = std::env::var("BUNNYDB_PIPELINE_URL")?;
-//! let token = std::env::var("BUNNYDB_TOKEN")?;
-//! let db = BunnyDbClient::new_bearer(pipeline_url, token);
+//! // Reads BUNNYDB_PIPELINE_URL and BUNNYDB_TOKEN automatically
+//! let db = BunnyDbClient::from_env().expect("missing BUNNYDB_* env vars");
 //!
 //! db.execute(
 //!     "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)",
@@ -24,7 +35,7 @@
 //!
 //! let result = db.query(
 //!     "SELECT id, name FROM users WHERE name = :name",
-//!     Params::named([("name", Value::text("Kit"))]),
+//!     bunnydb_http::Params::named([("name", bunnydb_http::Value::text("Kit"))]),
 //! ).await?;
 //!
 //! println!("rows={}", result.rows.len());
@@ -48,7 +59,7 @@ pub mod raw;
 #[cfg(feature = "row-map")]
 pub mod row_map;
 
-pub use client::BunnyDbClient;
+pub use client::{db_id_to_pipeline_url, BunnyDbClient};
 pub use error::BunnyDbError;
 pub use options::ClientOptions;
 pub use params::{Params, Statement};
