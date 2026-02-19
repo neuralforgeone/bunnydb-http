@@ -1,5 +1,5 @@
 /// Logical value type used for SQL parameters and decoded rows.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize)]
 pub enum Value {
     /// SQL null.
     Null,

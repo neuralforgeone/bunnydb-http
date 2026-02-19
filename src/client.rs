@@ -1,6 +1,10 @@
-use std::{fmt, time::Duration};
+use std::fmt;
+use std::time::Duration;
 
 use reqwest::{header, StatusCode};
+
+// tokio::time::sleep is only available on non-WASM targets.
+#[cfg(not(target_arch = "wasm32"))]
 use tokio::time::sleep;
 
 use crate::{
@@ -93,14 +97,18 @@ impl BunnyDbClient {
     ///
     /// Returns an error if either variable is missing or empty.
     ///
+    /// **Not available on `wasm32` targets** — environment variables do not
+    /// exist in browser runtimes. Use [`BunnyDbClient::new_bearer`] or
+    /// receive credentials from JavaScript via `wasm-bindgen`.
+    ///
     /// # Example
     ///
     /// ```no_run
     /// use bunnydb_http::BunnyDbClient;
     ///
-    /// // Set env vars via shell or .env loader, then:
     /// let db = BunnyDbClient::from_env().expect("missing BUNNYDB_* env vars");
     /// ```
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn from_env() -> std::result::Result<Self, String> {
         let url = std::env::var("BUNNYDB_PIPELINE_URL")
             .map_err(|_| "missing BUNNYDB_PIPELINE_URL environment variable".to_owned())?;
@@ -124,6 +132,8 @@ impl BunnyDbClient {
     ///
     /// The pipeline URL is derived from the database ID automatically.
     ///
+    /// **Not available on `wasm32` targets** — see [`BunnyDbClient::from_env`].
+    ///
     /// # Example
     ///
     /// ```no_run
@@ -131,6 +141,7 @@ impl BunnyDbClient {
     ///
     /// let db = BunnyDbClient::from_env_db_id().expect("missing BUNNYDB_ID / BUNNYDB_TOKEN");
     /// ```
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn from_env_db_id() -> std::result::Result<Self, String> {
         let db_id = std::env::var("BUNNYDB_ID")
             .map_err(|_| "missing BUNNYDB_ID environment variable".to_owned())?;
@@ -251,6 +262,8 @@ impl BunnyDbClient {
     ) -> Result<wire::PipelineResponse> {
         let mut attempt = 0usize;
         loop {
+            // Build the request. On WASM, reqwest uses AbortController for
+            // timeout; the `.timeout()` method is available on both targets.
             let response = self
                 .http
                 .post(&self.pipeline_url)
@@ -418,16 +431,37 @@ impl BunnyDbClient {
     }
 
     fn should_retry_transport(&self, err: &reqwest::Error) -> bool {
-        err.is_timeout() || err.is_connect() || err.is_request() || err.is_body()
+        err.is_timeout()
+            || err.is_request()
+            || err.is_body()
+            // is_connect() is not available on wasm32 targets (no TCP)
+            || {
+                #[cfg(not(target_arch = "wasm32"))]
+                { err.is_connect() }
+                #[cfg(target_arch = "wasm32")]
+                { false }
+            }
     }
 
+    /// Waits before the next retry attempt.
+    ///
+    /// On native targets: exponential backoff sleep via `tokio::time::sleep`.
+    /// On WASM targets: no-op — edge functions prefer fast failure over
+    /// sleeping, and `tokio::time::sleep` is not available.
     async fn wait_before_retry(&self, attempt: usize) {
         let exp = attempt.min(16) as u32;
         let multiplier = 1u64 << exp;
         let delay_ms = self.options.retry_backoff_ms.saturating_mul(multiplier);
+
         #[cfg(feature = "tracing")]
         tracing::debug!("retrying pipeline request after {} ms", delay_ms);
+
+        #[cfg(not(target_arch = "wasm32"))]
         sleep(Duration::from_millis(delay_ms)).await;
+
+        // WASM: no sleep implementation — suppress unused variable warning.
+        #[cfg(target_arch = "wasm32")]
+        let _ = delay_ms;
     }
 }
 
