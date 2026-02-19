@@ -31,3 +31,4 @@ baton-experimental = []
 [dev-dependencies]
 anyhow = "1"
 axum = "0.7"
+eframe = "0.27"

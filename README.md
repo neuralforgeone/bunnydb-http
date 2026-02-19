@@ -152,6 +152,32 @@ Defaults:
 - `row-map`: experimental row mapping helpers
 - `baton-experimental`: experimental baton/session types
 
+## GUI Client (Example)
+
+This repo includes a desktop GUI example built with `eframe/egui`.
+
+Run it:
+
+```bash
+cargo run --example gui
+```
+
+The GUI supports:
+
+- Query / Execute / Batch modes
+- Bearer or raw authorization mode
+- JSON params:
+  `[]` for positional, `{}` for named
+- Batch JSON format:
+
+```json
+[
+  { "kind": "execute", "sql": "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)" },
+  { "kind": "execute", "sql": "INSERT INTO users (name) VALUES (?)", "params": ["Kit"] },
+  { "kind": "query", "sql": "SELECT id, name FROM users", "params": [] }
+]
+```
+
 ## Testing
 
 Run all tests:
@@ -164,21 +190,6 @@ Live integration test reads credentials in this order:
 
 - Environment:
   `BUNNYDB_PIPELINE_URL` and `BUNNYDB_TOKEN`
-- Local file fallback:
-  `secrets.json` with either
-  `BUNNYDB_PIPELINE_URL` + `BUNNYDB_TOKEN`
-  or `BUNNY_DATABASE_URL` + `BUNNY_DATABASE_AUTH_TOKEN`
-
-`secrets.json` is excluded from packaging.
-
-## Publishing (crates.io)
-
-```bash
-cargo fmt --all
-cargo test
-cargo publish --dry-run
-cargo publish
-```
 
 ## MSRV
 
